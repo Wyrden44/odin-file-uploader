@@ -1,10 +1,10 @@
 # node-template
-## Odin - Project #{n}: {N}
+## Odin - Project #20: File Uploader
 
 Info
 
 ## General Info
-Date: 
+Date: 1.12.2025
 
 Finish: 
 
@@ -23,4 +23,4 @@ Advanced HTML and CSS: ✅ Complete
 
 React Course: ✅ Complete
 
-Node Course: p%
+Node Course: 65%
