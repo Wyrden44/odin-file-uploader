@@ -1,8 +1,10 @@
 const {Router} = require("express");
 const mainRouter = Router();
+const {authenticationRouter} = require("./authenticationRouter");
 
-mainRouter.get("/", (req, res) => {
 
-});
+mainRouter.use(authenticationRouter);
+
+mainRouter.use(viewRouter);
 
 module.exports = mainRouter;
