@@ -3,9 +3,13 @@ const authenticationRouter = Router();
 var bcrypt = require('bcryptjs');
 var passport = require('passport');
 var LocalStrategy = require('passport-local');
-const { PrismaClient } = require('../generated/prisma/client');
+const { PrismaClient } = require('@prisma/client');
+const { PrismaPg } = require("@prisma/adapter-pg");
 
-const prisma = new PrismaClient();
+const connectionString = `${process.env.DATABASE_URL}`;
+const adapter = new PrismaPg({connectionString});
+
+const prisma = new PrismaClient({adapter});
 
 passport.use(new LocalStrategy(async (username, password, done) => {
     try {
