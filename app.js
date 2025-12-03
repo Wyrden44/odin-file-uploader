@@ -11,8 +11,9 @@ const mainRouter = require("./routers/mainRouter");
 
 app.set("view engine", "ejs");
 app.set('views', path.join(__dirname, 'views'));
+app.use(express.static(__dirname + '/public'));
 app.use(express.json());
-app.use(express.urlencoded({extended: true}));
+app.use(express.urlencoded({extended: false}));
 
 const connectionString = `${process.env.DATABASE_URL}`
 const adapter = new PrismaPg({connectionString});

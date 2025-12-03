@@ -13,13 +13,13 @@ const prisma = new PrismaClient({adapter});
 
 passport.use(new LocalStrategy(async (username, password, done) => {
     try {
-        const user = await prisma.user.findUnique({
+        const user = await prisma.users.findUnique({
             where: {username}
         });
 
         if (!user) return done(null, false, { message: "Incorrect username." });
 
-        const match = await bcrypt.compare(password, user.password);
+        const match = bcrypt.compare(password, user.password);
 
         if (!match) {
             return done(null, false, { message: "Incorrect password" });
@@ -38,7 +38,7 @@ passport.serializeUser((user, done) => {
 
 passport.deserializeUser(async (id, done) => {
     try {
-        const user = await prisma.user.findUnique({ where: { id } });
+        const user = await prisma.users.findUnique({ where: { id } });
         return done(null, user);
     } catch (err) {
         return done(err);
@@ -46,19 +46,37 @@ passport.deserializeUser(async (id, done) => {
 });
 
 authenticationRouter.get("/login", (req, res) => {
-
+    res.render("index", {subpage: "login", subargs: {errors: null}});
 });
 
 authenticationRouter.get("/sign-up", (req, res) => {
-    
+    res.render("index", {subpage: "signup", subargs: {errors: null}}); 
 });
 
-authenticationRouter.post("/login", (req, res) => {
+authenticationRouter.post("/login",
+    passport.authenticate("local", {
+        successRedirect: "/",
+        failureRedirect: "/login",
+        failureMessage: true,
+    })
+);
 
-});
+authenticationRouter.post("/sign-up", async (req, res, next) => {
+    try {
+        const {username, password} = req.body;
+        const hashedPassword = await bcrypt.hash(password, 10);
+        await prisma.users.create({
+            data: {
+                username: username,
+                password: hashedPassword,
+            }
+        });
+        res.redirect("/");
+    }
+    catch (err) {
+        return next(err);
+    }
 
-authenticationRouter.post("/sign-up", (req, res) => {
-    
 });
 
 module.exports = {authenticationRouter};
