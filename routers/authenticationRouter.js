@@ -46,11 +46,11 @@ passport.deserializeUser(async (id, done) => {
 });
 
 authenticationRouter.get("/login", (req, res) => {
-    res.render("index", {subpage: "login", subargs: {errors: null}});
+    res.render("index", {subpage: "login", user: req.user, subargs: {errors: null}});
 });
 
 authenticationRouter.get("/sign-up", (req, res) => {
-    res.render("index", {subpage: "signup", subargs: {errors: null}}); 
+    res.render("index", {subpage: "signup", user: req.user, subargs: {errors: null}}); 
 });
 
 authenticationRouter.post("/login",
@@ -77,6 +77,13 @@ authenticationRouter.post("/sign-up", async (req, res, next) => {
         return next(err);
     }
 
+});
+
+authenticationRouter.post("/logout", (req, res, next) => {
+    req.logout(function (err) {
+        if (err) return next(err);
+        res.redirect("/");
+    })
 });
 
 module.exports = {authenticationRouter};

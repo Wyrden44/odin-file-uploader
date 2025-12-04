@@ -1,6 +1,23 @@
 <nav>
     <h1 class="header"><img src="/icons/upload.png" alt="Upload" class="website-logo">File Uploader</h1>
     <ul class="links">
-        <li><a href="upload">Upload</a></li>
+        <li><a href="/upload">Upload</a></li>
+        <% if (user) { %>
+            <li class="profile-link">
+                <a href="/profile"><img src="/icons/profile.png" alt="Profile"></a>
+            </li>
+            <li class="logout-link">
+                <form action="/logout" method="post">
+                    <button type="submit" class="logout-link"><img src="/icons/logout.png" alt="Log Out"></button>
+                </form>
+            </li>
+        <% } else { %>
+            <li class="login-link">
+                <a href="/login">Log In</a>
+            </li>
+            <li class="signup-link">
+                <a href="/sign-up">Sign Up</a>
+            </li>
+        <% } %>
     </ul>
 </nav>

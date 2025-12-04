@@ -6,7 +6,7 @@ viewRouter.get("/", (req, res) => {
 });
 
 viewRouter.get("/upload", (req, res) => {
-    res.render("index", {subpage: "upload", title: "Upload", subargs: {}});
-})
+    res.render("index", {subpage: "upload", title: "Upload", user: req.user, subargs: {}});
+});
 
 module.exports = {viewRouter};

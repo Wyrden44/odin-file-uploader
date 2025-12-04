@@ -38,7 +38,7 @@ nav {
 }
 
 nav .header {
-    font-size: 2rem;
+    font-size: 1.6rem;
     font-weight: bold;
     display: flex;
     align-items: center;
@@ -46,7 +46,7 @@ nav .header {
 
 nav .website-logo {
     width: auto;
-    height: 2.5rem;
+    height: 2rem;
 }
 
 nav .links {
@@ -54,4 +54,61 @@ nav .links {
     justify-content: start;
     align-items: center;
     height: 100%;
+    gap: 20px;
+}
+
+nav .links img {
+    height: 2rem;
+    width: auto;
+}
+
+nav .links a {
+    color: var(--background);
+    text-decoration: none;
+    font-size: 1.1rem;
+}
+
+nav .links button {
+    background-color: transparent;
+    outline: none;
+    border: none;
+}
+
+nav .links .login-link {
+    background-color: var(--secondary);
+}
+
+.links li{
+    border-radius: 10px;
+    padding: 10px;
+    cursor: pointer;
+}
+
+.links li a {
+    position: relative;
+}
+
+.links li a::after {
+    width: 0;
+    height: 2px;
+    content: "";
+    background-color: white;
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    transform: translateY(100%);
+
+    transition: width 0.3s ease-in-out;
+}
+
+.links li:hover a::after {
+    width: 100%;
+}
+
+.signup-link {
+    transition: background-color 0.2s ease-in;
+}
+
+.signup-link:hover {
+    background-color: var(--secondary);
 }

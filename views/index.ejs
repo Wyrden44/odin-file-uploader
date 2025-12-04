@@ -11,7 +11,7 @@
     <title>Postgre Practice</title>
 </head>
 <body>
-    <%- include("nav") %>
+    <%- include("nav", {user: locals.user}) %>
     <%- include(subpage, subargs) %>
 </body>
 </html>
