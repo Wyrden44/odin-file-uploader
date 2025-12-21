@@ -21,6 +21,9 @@ viewRouter.get("/files", async (req, res) => {
             parentId: {
                 equals: null,
             }
+        },
+        select: {
+            name: true,
         }
     });
 
