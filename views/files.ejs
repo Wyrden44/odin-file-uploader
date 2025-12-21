@@ -1,0 +1,10 @@
+<section class="files">
+    <button><img src="/icons/upload.png" alt="New">New Folder</button>
+    <section class="popup">
+        <form action="/files/<%= (currentFolder != null) ? currentFolder + "/" : "" %>new/folder" method="post">
+            <label for="name">Name:</label>
+            <input type="text" name="name">
+            <button type="submit">Create</button>
+        </form>
+    </section>
+</section>
