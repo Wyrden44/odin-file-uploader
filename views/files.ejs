@@ -1,15 +1,56 @@
 <section class="files">
-    <button><img src="/icons/upload.png" alt="New">New Folder</button>
-    <section class="popup">
-        <form action="/files/<%= (currentFolder != null) ? currentFolder + "/" : "" %>new/folder" method="post">
-            <label for="name">Name:</label>
-            <input type="text" name="name">
-            <button type="submit">Create</button>
-        </form>
-    </section>
+    <button class="new-folder">
+        <span class="plus-icon">&plus;</span> New
+    </button>
+
+    <div class="popup-backdrop" id="newFolderModal">
+        <div class="popup">
+            <button class="close" aria-label="Close">&times;</button>
+
+            <h3>New Folder</h3>
+
+            <form action="/files/<%= (currentFolder != null) ? currentFolder + '/' : '' %>new/folder" method="post">
+                <label for="name">Name</label>
+                <input type="text" name="name" id="name" required>
+                <button type="submit">Create</button>
+            </form>
+        </div>
+    </div>
+
     <div class="files-list">
         <% for (const folder of folders) { %>
-            <%- include("folder", {name: folder.name}) %>
+            <%- include("folder", { name: folder.name }) %>
         <% } %>
     </div>
+
+    <script>
+        const openBtn = document.querySelector(".new-folder");
+        const modalBackdrop = document.getElementById("newFolderModal");
+        const closeBtn = modalBackdrop.querySelector(".close");
+        const modalInput = modalBackdrop.querySelector("#name");
+
+        openBtn.addEventListener("click", () => {
+            modalBackdrop.classList.add("active");
+            modalInput.focus();
+        });
+
+        closeBtn.addEventListener("click", closeModal);
+
+        modalBackdrop.addEventListener("click", (e) => {
+            if (e.target === modalBackdrop) {
+                closeModal();
+            }
+        });
+
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") {
+                closeModal();
+            }
+        });
+
+        function closeModal() {
+            modalBackdrop.classList.remove("active");
+        }
+    </script>
+
 </section>

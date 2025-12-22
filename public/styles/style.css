@@ -17,6 +17,12 @@ body {
 
     background: var(--background);
     color: var(--text);
+
+    min-height: 100vh;
+}
+
+main {
+    height: calc(100vh - var(--nav-height));
 }
 
 ul {
@@ -111,4 +117,160 @@ nav .links .login-link {
 
 .signup-link:hover {
     background-color: var(--secondary);
+}
+
+/* folders & files */
+
+.files {
+    min-height: 100%;
+    padding: 20px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+
+    gap: 20px;
+
+    position: relative;
+}
+
+.new-folder {
+    align-self: flex-end;
+
+    padding: 8px;
+    padding-right: 12px;
+    border: none;
+    border-radius: 10px;
+
+    display: flex;
+    align-items: center;
+    gap: 5px;
+
+    font-size: 1rem;
+    color: var(--background);
+    font-weight: 600;
+
+    background-color: var(--secondary);
+}
+
+.new-folder .plus-icon {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.popup-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.25);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.popup-backdrop.active {
+    display: flex;
+}
+
+.popup {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+
+    background-color: var(--background);
+    padding: 20px;
+    border-radius: 10px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+}
+
+.popup form {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    gap: 5px;
+}
+
+.popup form label {
+    font-size: 0.9rem;
+}
+
+.popup form input {
+    padding: 5px;
+    font-size: 1rem;
+    border: 1px solid var(--primary);
+    border-radius: 5px;
+}
+
+.popup form input:hover {
+    border: 1px solid var(--secondary);
+}
+
+.popup form input:focus {
+    outline: 2px solid var(--secondary);
+}
+
+.popup form button {
+    margin-top: 10px;
+    align-self: end;
+    padding: 8px;
+    font-size: 0.9rem;
+    background-color: var(--secondary);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-weight: 500;
+}
+
+.popup .close {
+    color: var(--text);
+    position: absolute;
+    top: 0.5rem;
+    right: 0.75rem;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.popup .close:hover {
+    color: var(--secondary);
+}
+
+.files-list {
+    align-self: stretch;
+
+    display: grid;
+    grid-auto-rows: 1fr;
+}
+
+.files-list .folder {
+    text-decoration: none;
+    color: var(--text);
+    
+    display: flex;
+    align-items: center;
+    
+    gap: 10px;
+    padding: 20px;
+
+    cursor: pointer;
+}
+
+.files-list .folder:hover p{
+    text-decoration: underline;
+}
+
+.files-list .folder:not(:last-child) {
+    border-bottom: 2px solid var(--grey);
+}
+
+.files-list .folder img {
+    height: 2.5rem;
+    width: auto;
 }
