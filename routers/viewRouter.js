@@ -102,7 +102,7 @@ viewRouter.post("/files/:folder/new/folder/", async (req, res) => {
         }
     });
 
-    res.redirect("/files");
+    res.redirect("/files/" + folder);
 });
 
 // upload files
