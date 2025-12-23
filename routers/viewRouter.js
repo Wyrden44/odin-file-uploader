@@ -11,11 +11,35 @@ const connectionString = `${process.env.DATABASE_URL}`;
 const adapter = new PrismaPg({connectionString});
 const prisma = new PrismaClient({adapter});
 
+// helper
+async function deleteRecursively(folderInfo) {
+    // deletes a folder and all its subdirs recursively
+    for (let child of folderInfo.children) {
+        let newFolderInfo = await prisma.Folder.findUnique({
+            where: {
+                name: child.name,
+            },
+            select: {
+                children: true,
+                name: true,
+            }
+        });
+        deleteRecursively(newFolderInfo);
+    }
+    await prisma.Folder.delete({
+        where: {
+            name: folderInfo.name,
+        }
+    });
+}
+
 viewRouter.get("/", (req, res) => {
     res.redirect("/files");
 });
 
 viewRouter.get("/files", async (req, res) => {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+
     const folders = await prisma.Folder.findMany({
         where: {
             parentId: {
@@ -33,6 +57,8 @@ viewRouter.get("/files", async (req, res) => {
 
 // subdirectories
 viewRouter.get("/files/:folder", async (req, res) => {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+
     const {folder} = req.params;
 
     const parentFolder = await prisma.Folder.findUnique({
@@ -103,6 +129,41 @@ viewRouter.post("/files/:folder/new/folder/", async (req, res) => {
     });
 
     res.redirect("/files/" + folder);
+});
+
+viewRouter.post("/files/delete/folder/:folder", async (req, res) => {
+    const {folder} = req.params;
+
+    // recursively delete all subfolders
+    let folderInfo = await prisma.Folder.findUnique({
+        where: {
+            name: folder,
+        },
+        select: {
+            children: true,
+            parent: true,
+            name: true,
+        }
+    });
+
+    if (!folderInfo) {
+        return res.status(404).send("Folder not found");
+    }
+
+    deleteRecursively(folderInfo);
+
+    // redirect to parent
+    if (folderInfo.parent != null) {
+        const parentFolder = await prisma.Folder.findUnique({
+            where: {
+                id: folderInfo.parent.id,
+            }
+        });
+
+        return res.redirect("/files/" + parentFolder.name);
+    }
+
+    res.redirect("/files");
 });
 
 // upload files

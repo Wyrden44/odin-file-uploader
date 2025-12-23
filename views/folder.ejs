@@ -1,4 +1,10 @@
-<a class="folder" href="/files/<%= name %>">
-    <img src="/icons/folder.png" alt="folder">
-    <p class="name"><%= name %></p>
-</a>
+<div class="folder">
+    <a href="/files/<%= name %>" class="link">
+        <img src="/icons/folder.png" alt="folder">
+        <p class="name"><%= name %></p>
+    </a>
+    <div class="actions">
+        <button class="edit">Edit</button>
+        <form action="/files/delete/folder/<%= name %>" method="post"><button class="delete">Delete</button></form>
+    </div>
+</div>
