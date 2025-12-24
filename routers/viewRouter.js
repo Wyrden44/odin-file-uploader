@@ -51,8 +51,22 @@ viewRouter.get("/files", async (req, res) => {
         }
     });
 
+    const files = await prisma.File.findMany({
+        where: {
+            folderId: {
+                equals: null,
+            }
+        },
+        select: {
+            name: true,
+            storageKey: true,
+            size: true,
+            path: true,
+        }
+    });
+
     console.log("Root folders: ", folders);
-    res.render("index", {subpage: "files", title: "Files", user: req.user, subargs: {currentFolder: null, folders}});
+    res.render("index", {subpage: "files", title: "Files", user: req.user, subargs: {currentFolder: null, folders, files}});
 })
 
 // subdirectories
@@ -82,12 +96,75 @@ viewRouter.get("/files/:folder", async (req, res) => {
         }
     });
 
+    const files = await prisma.File.findMany({
+        where: {
+            folderId: {
+                equals: parentFolder.id,
+            }
+        },
+        select: {
+            name: true,
+            storageKey: true,
+            size: true,
+            path: true,
+        }
+    });
+
     console.log("folders: ", folders);
-    res.render("index", {subpage: "files", title: "Files", user: req.user, subargs: {currentFolder: folder, folders}});
+    console.log("files:", files);
+    res.render("index", {subpage: "files", title: "Files", user: req.user, subargs: {currentFolder: folder, folders, files}});
 });
 
 viewRouter.get("/upload", (req, res) => {
     res.render("index", {subpage: "upload", title: "Upload", user: req.user, subargs: {}});
+});
+
+
+// upload file
+viewRouter.post("/files/upload/file", upload.single("file"), async (req, res) => {
+    const {originalname, mimetype, filename, path, size} = req.file;
+
+    const data = await prisma.File.create({
+        data: {
+            name: originalname,
+            size,
+            mimeType: mimetype,
+            storageKey: filename,
+            path,
+        }
+    });
+
+    console.log("Data: ", data);
+
+    res.redirect("/files");
+});
+
+viewRouter.post("/files/:folder/upload/file", upload.single("file"), async (req, res) => {
+    const {folder} = req.params;
+    const {originalname, mimetype, filename, path, size} = req.file;
+
+    const parentFolder = await prisma.Folder.findUnique({
+        where: {
+            name: folder,
+        },
+        select: {
+            id: true
+        }
+    });
+
+    await prisma.File.create({
+        data: {
+            name: originalname,
+            size,
+            mimeType: mimetype,
+            storageKey: filename,
+            path,
+            
+            folderId: parentFolder.id,
+        }
+    });
+
+    res.redirect("/files/" + folder);
 });
 
 viewRouter.post("/files/new/folder", async (req, res) => {
@@ -164,12 +241,6 @@ viewRouter.post("/files/delete/folder/:folder", async (req, res) => {
     }
 
     res.redirect("/files");
-});
-
-// upload files
-viewRouter.post("/upload", upload.single("file"), (req, res) => {
-    console.log("File: ", req.file, "\n", "Other: ", req.body);
-    res.redirect("/upload");
 });
 
 

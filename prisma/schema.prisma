@@ -35,11 +35,11 @@ model Folder {
 }
 
 model File {
-  id          String    @id
+  storageKey  String @id
   name        String
   size        Int
   mimeType    String
-  storageKey  String
+  path        String
 
   folderId    Int?
   folder      Folder?   @relation(fields: [folderId], references: [id])

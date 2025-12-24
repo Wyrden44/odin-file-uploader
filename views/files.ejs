@@ -40,6 +40,9 @@
         <% for (const folder of folders) { %>
             <%- include("folder", { name: folder.name }) %>
         <% } %>
+        <% for (const file of files) { %>
+            <%- include("file", { name: file.name, size: file.size, path: file.path, storageKey: file.storageKey }) %>
+        <% } %>
     </div>
 
     <script>

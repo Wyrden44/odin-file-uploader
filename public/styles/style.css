@@ -274,7 +274,7 @@ nav .links .login-link {
     grid-auto-rows: 1fr;
 }
 
-.files-list .folder {    
+.files-list .folder, .files-list .file {    
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -283,7 +283,7 @@ nav .links .login-link {
     padding: 20px;
 }
 
-.files-list .folder .link {
+.files-list .folder .link, .files-list .file .link{
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -296,32 +296,32 @@ nav .links .login-link {
     text-decoration: underline;
 }
 
-.files-list .folder:not(:last-child) {
+.files-list .folder:not(:last-child), .files-list .file:not(:last-child) {
     border-bottom: 2px solid var(--grey);
 }
 
-.files-list .folder img {
+.files-list .folder img, .files-list .file img {
     height: 2.5rem;
     width: auto;
 }
 
-.files-list .folder .actions {
+.files-list .folder .actions, .files-list .file .actions {
     display: flex;
     gap: 10px;
     align-items: center;
 }
 
-.files-list .folder .actions button {
+.files-list .folder .actions button, .files-list .file .actions button {
     padding: 7px;
     border-radius: 10px;
     background-color: var(--primary-light);
     border: none;
 }
 
-.files-list .folder .actions button:hover {
+.files-list .folder .actions button:hover, .files-list .file .actions button:hover {
     outline: 1px solid var(--secondary);
 }
 
-.files-list .folder .actions .delete {
+.files-list .folder .actions .delete, .files-list .file .actions .delete {
     color: red;
 }
