@@ -4,7 +4,7 @@
         <p class="name"><%= name %></p>
     </a>
     <div class="actions">
-        <button class="download">Download</button>
+        <form action="/files/download/<%= storageKey %>" method="post"><button class="download">Download</button></form>
         <form action="/files/delete/file/<%= storageKey %>" method="post"><button class="delete">Delete</button></form>
     </div>
 </div>

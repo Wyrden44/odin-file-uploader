@@ -285,5 +285,25 @@ viewRouter.post("/files/delete/file/:file", async (req, res) => {
     res.redirect("/files");
 });
 
+// download
+viewRouter.post("/files/download/:file", async (req, res) => {
+    const {file} = req.params;
+
+    const fileData = await prisma.File.findUnique({
+        where: {
+            storageKey: file,
+        },
+        select: {
+            path: true,
+            name: true,
+        }
+    });
+
+    if (!fileData) {
+        return res.status(404).send("File not found");
+    }
+
+    res.download(fileData.path, fileData.name);
+});
 
 module.exports = {viewRouter};
