@@ -1,5 +1,6 @@
 const {Router} = require("express");
 const multer = require("multer");
+const fs = require("fs/promises");
 const { PrismaClient } = require('@prisma/client');
 const { PrismaPg } = require("@prisma/adapter-pg");
 
@@ -237,6 +238,47 @@ viewRouter.post("/files/delete/folder/:folder", async (req, res) => {
             }
         });
 
+        return res.redirect("/files/" + parentFolder.name);
+    }
+
+    res.redirect("/files");
+});
+
+viewRouter.post("/files/delete/file/:file", async (req, res) => {
+    const {file} = req.params;
+
+    const fileData = await prisma.File.findUnique({
+        where: {
+            storageKey: file,
+        },
+        select: {
+            folderId: true,
+            path: true,
+        }
+    });
+
+    await prisma.File.delete({
+        where: {
+            storageKey: file,
+        }
+    });
+
+    // delete from disk
+    try {
+        await fs.unlink(fileData.path);
+    } catch(err) {
+        console.error("Failed to delete file:", err);
+    }
+
+    if (fileData.folderId) {
+        const parentFolder = await prisma.Folder.findUnique({
+            where: {
+                id: fileData.folderId,
+            },
+            select: {
+                name: true,
+            }
+        });
         return res.redirect("/files/" + parentFolder.name);
     }
 
