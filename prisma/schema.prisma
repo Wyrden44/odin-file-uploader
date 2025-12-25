@@ -13,10 +13,13 @@ model Session {
   expiresAt DateTime
 }
 
-model users {
+model User {
   id       Int     @id @default(autoincrement())
   username String? @unique @db.VarChar(255)
   password String?
+
+  folders  Folder[]
+  files    File[]
 }
 
 model Folder {
@@ -32,6 +35,9 @@ model Folder {
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+
+  userId    Int
+  user      User      @relation(fields: [userId], references: [id])  
 }
 
 model File {
@@ -46,4 +52,7 @@ model File {
 
   uploadedAt  DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+
+  userId      Int
+  user        User      @relation(fields: [userId], references: [id])
 }

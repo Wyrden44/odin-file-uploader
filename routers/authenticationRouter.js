@@ -13,7 +13,7 @@ const prisma = new PrismaClient({adapter});
 
 passport.use(new LocalStrategy(async (username, password, done) => {
     try {
-        const user = await prisma.users.findUnique({
+        const user = await prisma.User.findUnique({
             where: {username}
         });
 
@@ -38,7 +38,7 @@ passport.serializeUser((user, done) => {
 
 passport.deserializeUser(async (id, done) => {
     try {
-        const user = await prisma.users.findUnique({ where: { id } });
+        const user = await prisma.User.findUnique({ where: { id } });
         return done(null, user);
     } catch (err) {
         return done(err);
@@ -65,7 +65,7 @@ authenticationRouter.post("/sign-up", async (req, res, next) => {
     try {
         const {username, password} = req.body;
         const hashedPassword = await bcrypt.hash(password, 10);
-        await prisma.users.create({
+        await prisma.User.create({
             data: {
                 username: username,
                 password: hashedPassword,
