@@ -36,6 +36,18 @@
         </div>
     </div>
 
+    <div class="popup-backdrop" id="fileDetailsModal">
+        <div class="popup">
+            <button class="close" id="closeFileDetails" aria-label="Close" onclick="closeFileDetails()">&times;</button>
+
+            <h3>File Details</h3>
+
+            <div class="popup-file-details">
+
+            </div>
+        </div>
+    </div>
+
     <div class="files-list">
         <% for (const folder of folders) { %>
             <%- include("folder", { name: folder.name }) %>
@@ -53,6 +65,8 @@
         const closeBtn = modalBackdrop.querySelector(".close");
         const fileCloseBtn = fileModalBackdrop.querySelector("#closeFile");
         const modalInput = modalBackdrop.querySelector("#name");
+        const uploadFileModalBackdrop = document.getElementById("fileDetailsModal");
+        const popupFileParent = document.querySelector(".popup-file-details");
 
         addModalOpenEvents(openBtn, modalBackdrop);
         addModalOpenEvents(fileOpenBtn, fileModalBackdrop);
@@ -86,6 +100,23 @@
                     closeModal(modal);
                 }
             });
+        }
+
+        // open details
+        async function openFileDetails(id) {
+            console.log("test");
+            const res = await fetch(`/files/details/file/${id}`);
+            if (!res.ok) {
+                return;
+            }
+
+            const html = await res.text();
+            popupFileParent.innerHTML = html;
+            uploadFileModalBackdrop.classList.add("active");
+        }
+
+        function closeFileDetails() {
+            uploadFileModalBackdrop.classList.remove("active");
         }
     </script>
 

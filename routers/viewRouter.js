@@ -82,12 +82,6 @@ viewRouter.get("/files", ensureAuth, async (req, res) => {
                     equals: req.user.id,
                 }
             }
-        },
-        select: {
-            name: true,
-            storageKey: true,
-            size: true,
-            path: true,
         }
     });
 
@@ -130,12 +124,6 @@ viewRouter.get("/files/:folder", ensureAuth, async (req, res) => {
             folderId: {
                 equals: parentFolder.id,
             }
-        },
-        select: {
-            name: true,
-            storageKey: true,
-            size: true,
-            path: true,
         }
     });
 
@@ -346,6 +334,31 @@ viewRouter.post("/files/download/:file", ensureAuth, async (req, res) => {
     }
 
     res.download(fileData.path, fileData.name);
+});
+
+// fetching file details
+viewRouter.get("/files/details/file/:file", async (req, res) => {
+    const {file} = req.params;
+
+    const fileInfo = await prisma.File.findUnique({
+        where: {
+            storageKey: file,
+        }
+    });
+
+    if (!fileInfo || fileInfo.userId != req.user.id) {
+        return res.status(404).send("File not Found");
+    }
+
+    res.render("details", {name: fileInfo.name,
+        size: fileInfo.size,
+        createdAt: fileInfo.uploadedAt,
+        updatedAt: fileInfo.updatedAt,
+        // helper to format the date
+        formatDate: (date) => new Date(date).toLocaleString(undefined, {
+            dateStyle: "medium",
+            timeStyle: "short"
+    })});
 });
 
 module.exports = {viewRouter};
