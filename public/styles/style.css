@@ -121,6 +121,55 @@ nav .links .login-link {
     background-color: var(--secondary);
 }
 
+/* login, signup */
+.login-page, .signup-page {
+    margin-top: 20px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-form, .signup-form {
+    margin-top: 20px;
+    background-color: var(--primary-light);
+    padding: 20px;
+    border-radius: 10px;
+    width: clamp(100px, 80%, 500px);
+}
+
+.input-section {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin-bottom: 15px;
+}
+
+.input-section label {
+    font-size: 0.9rem;
+}
+
+.input-section input {
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid var(--grey-dark);
+    outline: none;
+}
+
+.input-section input:focus {
+    border-color: var(--secondary);
+}
+
+.login-form > button, .signup-form > button {
+    padding: 10px 15px;
+    background-color: var(--secondary);
+    border-radius: 10px;
+    border: none;
+    font-weight: bold;
+    color: var(--background);
+}
+
 /* folders & files */
 
 .files {
