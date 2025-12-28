@@ -11,6 +11,7 @@ body {
     --primary-light: #00487C33;
     --secondary: #0496FF;
     --accent: #3E6680;
+    --secondary-light: #0496FF33;
     --grey: #c8c8c8;
     --grey-dark: #3E6680;
 
@@ -324,4 +325,17 @@ nav .links .login-link {
 
 .files-list .folder .actions .delete, .files-list .file .actions .delete {
     color: red;
+}
+
+/* details */
+.file-details th, .file-details td {
+    padding: 10px;
+}
+
+.file-details table tr:nth-child(2n) {
+    background-color: var(--primary-light);
+}
+
+.file-details table tr:not(:nth-child(2n)) {
+    background-color: var(--secondary-light);
 }
