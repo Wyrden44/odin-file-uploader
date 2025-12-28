@@ -1,8 +1,10 @@
 const {Router} = require("express");
 const multer = require("multer");
 const fs = require("fs/promises");
+const {validationResult} = require("express-validator");
 const { PrismaClient } = require('@prisma/client');
 const { PrismaPg } = require("@prisma/adapter-pg");
+const validator = require("../controllers/formValidator");
 
 const viewRouter = Router();
 const upload = multer({dest: "./public/data/uploads/"})
@@ -189,7 +191,14 @@ viewRouter.post("/files/:folder/upload/file", ensureAuth, upload.single("file"),
     res.redirect("/files/" + folder);
 });
 
-viewRouter.post("/files/new/folder", ensureAuth, async (req, res) => {
+viewRouter.post("/files/new/folder", ensureAuth, validator.folderValidator, async (req, res) => {
+    const errors = validationResult(req).array();
+    console.log("errors", errors);
+
+    if (errors.length !== 0) {
+        return res.redirect("/files");
+    }
+
     const {name} = req.body;
     await prisma.Folder.create({
         data: {
@@ -202,7 +211,7 @@ viewRouter.post("/files/new/folder", ensureAuth, async (req, res) => {
 });
 
 // subdir
-viewRouter.post("/files/:folder/new/folder/", ensureAuth, async (req, res) => {
+viewRouter.post("/files/:folder/new/folder/", ensureAuth, validator.folderValidator, async (req, res) => {
     const {folder} = req.params;
     const {name} = req.body;
     // parent
@@ -284,8 +293,13 @@ viewRouter.post("/files/delete/file/:file", ensureAuth, async (req, res) => {
         select: {
             folderId: true,
             path: true,
+            userId: true,
         }
     });
+
+    if (!fileData || fileData.userId != req.user.id) {
+        return res.status(404).send("File not Found");
+    }
 
     await prisma.File.delete({
         where: {
@@ -326,10 +340,11 @@ viewRouter.post("/files/download/:file", ensureAuth, async (req, res) => {
         select: {
             path: true,
             name: true,
+            userId: true,
         }
     });
 
-    if (!fileData) {
+    if (!fileData || fileInfo.userId != req.user.id) {
         return res.status(404).send("File not found");
     }
 

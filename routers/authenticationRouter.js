@@ -1,8 +1,10 @@
 const {Router} = require("express");
 const authenticationRouter = Router();
-var bcrypt = require('bcryptjs');
-var passport = require('passport');
-var LocalStrategy = require('passport-local');
+const bcrypt = require('bcryptjs');
+const passport = require('passport');
+const validator = require("../controllers/formValidator");
+const {validationResult} = require("express-validator");
+const LocalStrategy = require('passport-local');
 const { PrismaClient } = require('@prisma/client');
 const { PrismaPg } = require("@prisma/adapter-pg");
 
@@ -19,7 +21,7 @@ passport.use(new LocalStrategy(async (username, password, done) => {
 
         if (!user) return done(null, false, { message: "Incorrect username." });
 
-        const match = bcrypt.compare(password, user.password);
+        const match = await bcrypt.compare(password, user.password);
 
         if (!match) {
             return done(null, false, { message: "Incorrect password" });
@@ -54,6 +56,16 @@ authenticationRouter.get("/sign-up", (req, res) => {
 });
 
 authenticationRouter.post("/login",
+    validator.loginValidator,
+    (req, res, next) => {
+        const errors = validationResult(req).array();
+
+        if (errors.length !== 0) {
+            return res.render("index", {subpage: "login", user: req.user, subargs: {errors}})
+        }
+
+        next();
+    },
     passport.authenticate("local", {
         successRedirect: "/",
         failureRedirect: "/login",
@@ -61,7 +73,12 @@ authenticationRouter.post("/login",
     })
 );
 
-authenticationRouter.post("/sign-up", async (req, res, next) => {
+authenticationRouter.post("/sign-up", validator.signupValidator, async (req, res, next) => {
+    const errors = validationResult(req).array();
+    if (errors.length !== 0) {
+        return res.render("index", {subpage: "signup", user: req.user, subargs: {errors: [errors[0]]}}); // only use first error for it not to be overwhealming
+    }
+
     try {
         const {username, password} = req.body;
         const hashedPassword = await bcrypt.hash(password, 10);
