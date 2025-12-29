@@ -402,3 +402,11 @@ nav .links .login-link {
     color: var(--grey-dark);
     font-size: 1.25rem;
 }
+
+.errors {
+    margin-top: 20px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
