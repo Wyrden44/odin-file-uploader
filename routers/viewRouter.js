@@ -7,7 +7,18 @@ const { PrismaPg } = require("@prisma/adapter-pg");
 const validator = require("../controllers/formValidator");
 
 const viewRouter = Router();
-const upload = multer({dest: "./public/data/uploads/"})
+const upload = multer({
+    dest: "./public/data/uploads/",
+    limits: {
+        fileSize: 10 * 1024 * 1024,
+    },
+    fileFilter: (req, file, cb) => {
+        if (file.size >= 10 * 1024 * 1024) {
+            return cb(new Error("File too large"), false);
+        }
+        return cb(null, true);
+    }
+});
 
 // prisma
 const connectionString = `${process.env.DATABASE_URL}`;
