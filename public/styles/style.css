@@ -388,3 +388,17 @@ nav .links .login-link {
 .file-details table tr:not(:nth-child(2n)) {
     background-color: var(--secondary-light);
 }
+
+/* errors */
+.error-page {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    margin-top: 20px;
+    gap: 10px;
+}
+
+.error-page p {
+    color: var(--grey-dark);
+    font-size: 1.25rem;
+}
