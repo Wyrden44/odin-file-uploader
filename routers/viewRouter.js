@@ -146,11 +146,6 @@ viewRouter.get("/files/:folder", ensureAuth, asyncHandler(async (req, res) => {
     res.render("index", {subpage: "files", title: "Files", user: req.user, subargs: {currentFolder: folder, folders, files}});
 }));
 
-viewRouter.get("/upload", ensureAuth, (req, res) => {
-    res.render("index", {subpage: "upload", title: "Upload", user: req.user, subargs: {}});
-});
-
-
 // upload file
 viewRouter.post("/files/upload/file",
     ensureAuth,
