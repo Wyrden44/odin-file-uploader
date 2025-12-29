@@ -30,7 +30,7 @@
 
             <form action="/files/<%= (currentFolder != null) ? currentFolder + '/' : '' %>upload/file" method="post" enctype="multipart/form-data">
                 <label for="file">File:</label>
-                <input type="file" name="file" id="file">
+                <input type="file" name="file" id="file" required>
                 <button type="submit">Upload</button>
             </form>
         </div>

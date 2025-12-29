@@ -4,6 +4,7 @@ const fs = require("fs/promises");
 const {validationResult} = require("express-validator");
 const { PrismaClient } = require('@prisma/client');
 const { PrismaPg } = require("@prisma/adapter-pg");
+const CustomError = require("../errors/customError");
 const validator = require("../controllers/formValidator");
 
 const viewRouter = Router();
@@ -14,7 +15,7 @@ const upload = multer({
     },
     fileFilter: (req, file, cb) => {
         if (file.size >= 10 * 1024 * 1024) {
-            return cb(new Error("File too large"), false);
+            return cb(null, false);
         }
         return cb(null, true);
     }
@@ -64,14 +65,17 @@ async function deleteRecursively(folderInfo) {
     });
 }
 
+const asyncHandler = (fn) => (req, res, next) => {
+    Promise.resolve(fn(req, res, next)).catch(next);
+}
+
+
 viewRouter.get("/", (req, res) => {
     res.redirect("/files");
 });
 
-viewRouter.get("/files", ensureAuth, async (req, res) => {
+viewRouter.get("/files", ensureAuth, asyncHandler(async (req, res) => {
     res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
-
-    console.log("User:", req.user);
 
     const folders = await prisma.Folder.findMany({
         where: {
@@ -98,12 +102,11 @@ viewRouter.get("/files", ensureAuth, async (req, res) => {
         }
     });
 
-    console.log("Root folders: ", folders);
     res.render("index", {subpage: "files", title: "Files", user: req.user, subargs: {currentFolder: null, folders, files}});
-})
+}));
 
 // subdirectories
-viewRouter.get("/files/:folder", ensureAuth, async (req, res) => {
+viewRouter.get("/files/:folder", ensureAuth, asyncHandler(async (req, res) => {
     res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
 
     const {folder} = req.params;
@@ -121,7 +124,7 @@ viewRouter.get("/files/:folder", ensureAuth, async (req, res) => {
     });
 
     if (!parentFolder) {
-        return res.status(404).send("Folder not Found");
+        throw new CustomError("Folder not Found", 404);
     }
 
     const folders = await prisma.Folder.findMany({
@@ -140,10 +143,8 @@ viewRouter.get("/files/:folder", ensureAuth, async (req, res) => {
         }
     });
 
-    console.log("folders: ", folders);
-    console.log("files:", files);
     res.render("index", {subpage: "files", title: "Files", user: req.user, subargs: {currentFolder: folder, folders, files}});
-});
+}));
 
 viewRouter.get("/upload", ensureAuth, (req, res) => {
     res.render("index", {subpage: "upload", title: "Upload", user: req.user, subargs: {}});
@@ -151,58 +152,78 @@ viewRouter.get("/upload", ensureAuth, (req, res) => {
 
 
 // upload file
-viewRouter.post("/files/upload/file", ensureAuth, upload.single("file"), async (req, res) => {
-    const {originalname, mimetype, filename, path, size} = req.file;
-
-    const data = await prisma.File.create({
-        data: {
-            name: originalname,
-            size,
-            mimeType: mimetype,
-            storageKey: filename,
-            path,
-            userId: req.user.id,
-        }
+viewRouter.post("/files/upload/file",
+    ensureAuth,
+    (req, res, next) => {
+    upload.single("file")(req, res, err => {
+        if (err) return next(err)
+        next()
     });
+    },
+    asyncHandler(async (req, res) => {
+        if (!req.file) return res.redirect("/files");
 
-    console.log("Data: ", data);
+        const {originalname, mimetype, filename, path, size} = req.file;
 
-    res.redirect("/files");
-});
-
-viewRouter.post("/files/:folder/upload/file", ensureAuth, upload.single("file"), async (req, res) => {
-    const {folder} = req.params;
-    const {originalname, mimetype, filename, path, size} = req.file;
-
-    const parentFolder = await prisma.Folder.findFirst({
-        where: {
-            AND: {
-                name: folder,
+        const data = await prisma.File.create({
+            data: {
+                name: originalname,
+                size,
+                mimeType: mimetype,
+                storageKey: filename,
+                path,
                 userId: req.user.id,
             }
-        },
-        select: {
-            id: true
+        });
+
+        res.redirect("/files");
+}));
+
+viewRouter.post("/files/:folder/upload/file",
+    ensureAuth,
+    (req, res, next) => {
+        upload.single("file")(req, res, err => {
+        if (err) {
+            return next(err)
         }
-    });
+        next()
+        })
+    },
+    asyncHandler(async (req, res) => {
+        if (!req.file) return res.redirect("/files");
 
-    await prisma.File.create({
-        data: {
-            name: originalname,
-            size,
-            mimeType: mimetype,
-            storageKey: filename,
-            path,
-            
-            folderId: parentFolder.id,
-            userId: req.user.id,
-        }
-    });
+        const {folder} = req.params;
+        const {originalname, mimetype, filename, path, size} = req.file;
 
-    res.redirect("/files/" + folder);
-});
+        const parentFolder = await prisma.Folder.findFirst({
+            where: {
+                AND: {
+                    name: folder,
+                    userId: req.user.id,
+                }
+            },
+            select: {
+                id: true
+            }
+        });
 
-viewRouter.post("/files/new/folder", ensureAuth, validator.folderValidator, async (req, res) => {
+        await prisma.File.create({
+            data: {
+                name: originalname,
+                size,
+                mimeType: mimetype,
+                storageKey: filename,
+                path,
+                
+                folderId: parentFolder.id,
+                userId: req.user.id,
+            }
+        });
+
+        res.redirect("/files/" + folder);
+}));
+
+viewRouter.post("/files/new/folder", ensureAuth, validator.folderValidator, asyncHandler(async (req, res) => {
     const errors = validationResult(req).array();
     console.log("errors", errors);
 
@@ -211,19 +232,29 @@ viewRouter.post("/files/new/folder", ensureAuth, validator.folderValidator, asyn
     }
 
     const {name} = req.body;
-    await prisma.Folder.create({
-        data: {
-            name,
-            userId: req.user.id,
-        }
-    });
+
+    try {
+        await prisma.Folder.create({
+            data: {
+                name,
+                userId: req.user.id,
+            }
+        });
+    } catch(e) {
+        throw new CustomError("A folder with this name already exists");
+    }
 
     res.redirect("/files");
-});
+}));
 
 // subdir
-viewRouter.post("/files/:folder/new/folder/", ensureAuth, validator.folderValidator, async (req, res) => {
+viewRouter.post("/files/:folder/new/folder/", ensureAuth, validator.folderValidator, asyncHandler(async (req, res) => {
     const {folder} = req.params;
+
+    const errors = validationResult(req).array();
+
+    if (errors.length !== 0) return res.redirect("/files/" + folder);
+    
     const {name} = req.body;
     // parent
     const parentFolder = await prisma.Folder.findFirst({
@@ -238,24 +269,26 @@ viewRouter.post("/files/:folder/new/folder/", ensureAuth, validator.folderValida
         }
     });
 
-    console.log("parent", parentFolder, folder, name);
-
     if (!parentFolder) {
-        return res.status(404).send("Folder not found");
+        throw new CustomError("Folder not Found", 404);
     }
 
-    await prisma.Folder.create({
-        data: {
-            name,
-            parentId: parentFolder.id,
-            userId: req.user.id,
-        }
-    });
+    try {
+        await prisma.Folder.create({
+            data: {
+                name,
+                parentId: parentFolder.id,
+                userId: req.user.id,
+            }
+        });
+    } catch(e) {
+        throw new CustomError("A folder with this name already exists");
+    }
 
     res.redirect("/files/" + folder);
-});
+}));
 
-viewRouter.post("/files/delete/folder/:folder", ensureAuth, async (req, res) => {
+viewRouter.post("/files/delete/folder/:folder", ensureAuth, asyncHandler(async (req, res) => {
     const {folder} = req.params;
 
     // recursively delete all subfolders
@@ -275,7 +308,7 @@ viewRouter.post("/files/delete/folder/:folder", ensureAuth, async (req, res) => 
     });
 
     if (!folderInfo) {
-        return res.status(404).send("Folder not found");
+        throw new CustomError("Folder not Found", 404);
     }
 
     deleteRecursively(folderInfo);
@@ -292,9 +325,9 @@ viewRouter.post("/files/delete/folder/:folder", ensureAuth, async (req, res) => 
     }
 
     res.redirect("/files");
-});
+}));
 
-viewRouter.post("/files/delete/file/:file", ensureAuth, async (req, res) => {
+viewRouter.post("/files/delete/file/:file", ensureAuth, asyncHandler(async (req, res) => {
     const {file} = req.params;
 
     const fileData = await prisma.File.findUnique({
@@ -309,7 +342,7 @@ viewRouter.post("/files/delete/file/:file", ensureAuth, async (req, res) => {
     });
 
     if (!fileData || fileData.userId != req.user.id) {
-        return res.status(404).send("File not Found");
+        throw new CustomError("File not Found", 404);
     }
 
     await prisma.File.delete({
@@ -338,10 +371,10 @@ viewRouter.post("/files/delete/file/:file", ensureAuth, async (req, res) => {
     }
 
     res.redirect("/files");
-});
+}));
 
 // download
-viewRouter.post("/files/download/:file", ensureAuth, async (req, res) => {
+viewRouter.post("/files/download/:file", ensureAuth, asyncHandler(async (req, res) => {
     const {file} = req.params;
 
     const fileData = await prisma.File.findUnique({
@@ -356,14 +389,14 @@ viewRouter.post("/files/download/:file", ensureAuth, async (req, res) => {
     });
 
     if (!fileData || fileInfo.userId != req.user.id) {
-        return res.status(404).send("File not found");
+        throw new CustomError("File not Found", 404);
     }
 
     res.download(fileData.path, fileData.name);
-});
+}));
 
 // fetching file details
-viewRouter.get("/files/details/file/:file", async (req, res) => {
+viewRouter.get("/files/details/file/:file", asyncHandler(async (req, res) => {
     const {file} = req.params;
 
     const fileInfo = await prisma.File.findUnique({
@@ -373,7 +406,7 @@ viewRouter.get("/files/details/file/:file", async (req, res) => {
     });
 
     if (!fileInfo || fileInfo.userId != req.user.id) {
-        return res.status(404).send("File not Found");
+        throw new CustomError("File not Found", 404);
     }
 
     res.render("details", {name: fileInfo.name,
@@ -385,6 +418,6 @@ viewRouter.get("/files/details/file/:file", async (req, res) => {
             dateStyle: "medium",
             timeStyle: "short"
     })});
-});
+}));
 
 module.exports = {viewRouter};
