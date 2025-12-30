@@ -3,7 +3,9 @@
         <img src="/icons/file.png" alt="file">
         <p class="name"><%= name %></p>
     </a>
-    <div class="actions">
-        <form action="/files/download/<%= storageKey %>" method="post"><button class="download">Download</button></form>
+    <div class="explorer-actions">
+        <div class="option-select">
+            <form action="/files/download/<%= storageKey %>" method="post"><button class="download">Download</button></form>
+        </div>
     </div>
 </div>

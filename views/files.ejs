@@ -13,7 +13,7 @@
                 <span class="plus-icon">&plus;</span> New
             </button>
             <button class="new-file">
-                <span class="plus-icon">&plus;</span> Upload File
+                <span class="plus-icon">&plus;</span> Upload
             </button>
         </div>
     </div>
@@ -153,6 +153,21 @@
         function closeFileDetails() {
             uploadFileModalBackdrop.classList.remove("active");
         }
+
+        // file responsiveness
+        const actions = document.querySelectorAll(".explorer-actions");
+
+        actions.forEach((action) => {
+            const btnMenu = action.querySelector(".button-menu");
+            btnMenu.addEventListener("click", (e) => {
+                if (action.classList.contains("active")) {
+                    action.classList.remove("active");
+                }
+                else {
+                    action.classList.add("active");
+                }
+            });
+        });
     </script>
 
 </section>

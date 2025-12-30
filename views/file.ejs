@@ -3,9 +3,12 @@
         <img src="/icons/file.png" alt="file">
         <p class="name"><%= name %></p>
     </a>
-    <div class="actions">
-        <button class="details" onclick="openFileDetails('<%= storageKey %>')">Details</button>
-        <form action="/files/download/<%= storageKey %>" method="post"><button class="download">Download</button></form>
-        <form action="/files/delete/file/<%= storageKey %>" method="post"><button class="delete">Delete</button></form>
+    <div class="explorer-actions">
+        <div class="button-menu"><img src="/icons/dots.png" alt="menu"></div>
+        <div class="option-select">
+            <button class="details" onclick="openFileDetails('<%= storageKey %>')">Details</button>
+            <form action="/files/download/<%= storageKey %>" method="post"><button class="download">Download</button></form>
+            <form action="/files/delete/file/<%= storageKey %>" method="post"><button class="delete">Delete</button></form>
+        </div>
     </div>
 </div>

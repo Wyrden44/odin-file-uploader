@@ -25,6 +25,9 @@ body {
 
 main {
     height: calc(100vh - var(--nav-height));
+    width: 100%;
+    max-width: 1500px;
+    margin: 0 auto;
 }
 
 ul {
@@ -206,15 +209,20 @@ nav .links .login-link {
     justify-content: start;
     align-items: center;
     gap: 5px;
+    max-width: clamp(10%, 200px, 40%);
+    overflow: hidden;
 }
 
 .upload > .back:hover {
     text-decoration: underline;
 }
 
-.upload > .back > .current-folder {
+.back .current-folder {
     font-size: 1.5rem;
     color: var(--grey-dark);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .upload > .actions {
@@ -343,19 +351,32 @@ nav .links .login-link {
 .files-list .folder, .files-list .file {    
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    
+
     gap: 10px;
     padding: 20px;
 }
 
-.files-list .folder .link, .files-list .file .link{
+.files-list .folder .name, .files-list .file .name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.files-list .folder .link, .files-list .file .link {
     cursor: pointer;
     display: flex;
     align-items: center;
     gap: 10px;
     color: var(--text);
     text-decoration: none;
+
+    max-width: 60%;
+}
+
+.files-list .file .link {
+    max-width: 50%;
 }
 
 .files-list .link:hover p{
@@ -366,29 +387,50 @@ nav .links .login-link {
     border-bottom: 2px solid var(--grey);
 }
 
-.files-list .folder img, .files-list .file img {
+.files-list .folder > a > img, .files-list .file > a > img {
     height: 2.5rem;
     width: auto;
 }
 
-.files-list .folder .actions, .files-list .file .actions {
+.files-list .folder .explorer-actions, .files-list .file .explorer-actions {
+    margin-left: auto;
+    position: relative;
+}
+
+.files-list .folder .explorer-actions .option-select, .files-list .file .explorer-actions .option-select {
     display: flex;
     gap: 10px;
     align-items: center;
 }
 
-.files-list .folder .actions button, .files-list .file .actions button {
+.files-list .folder .explorer-actions button, .files-list .file .explorer-actions button {
     padding: 7px;
     border-radius: 10px;
     background-color: var(--primary-light);
     border: none;
 }
 
-.files-list .folder .actions button:hover, .files-list .file .actions button:hover {
+.files-list .folder .explorer-actions button:hover, .files-list .file .explorer-actions button:hover {
     outline: 1px solid var(--secondary);
 }
 
-.files-list .folder .actions .delete, .files-list .file .actions .delete {
+.button-menu {
+    display: none;
+    padding: 10px;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    font-weight: 500;
+    width: 25px;
+    height: 25px;
+
+    transition: background-color 0.3s ease-in;
+}
+
+.button-menu:hover {
+    background-color: var(--secondary-light);
+}
+
+.files-list .folder .explorer-actions .delete, .files-list .file .explorer-actions .delete {
     color: red;
 }
 
@@ -425,4 +467,99 @@ nav .links .login-link {
     display: flex;
     flex-direction: column;
     gap: 5px;
+}
+
+@media (max-width: 600px) {
+    .popup input {
+        max-width: 250px;
+    }
+
+    nav .header {
+        font-size: 1.4rem;
+    }
+
+    nav .links {
+        gap: 8px;
+    }
+
+    nav .links a {
+        font-size: 0.9rem;
+    }
+    
+    .button-menu {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .button-menu > img {
+        width: 30px;
+        height: 30px;
+    }
+
+    .files-list .file .explorer-actions .option-select, .files-list .folder .explorer-actions .option-select {
+        display: none;
+        flex-direction: column;
+        gap: 1px;
+        width: 250px;
+        border-radius: 10px;
+        overflow: hidden;
+        border: 1px solid var(--grey-dark);
+        background-color: var(--secondary);
+
+        position: absolute;
+        top: 0;
+        left: -10px;
+        transform: translateX(-100%);
+    }
+
+    .files-list .file .explorer-actions.active .option-select, .files-list .folder .explorer-actions.active .option-select {
+        display: flex;
+    }
+
+    .files-list .file .explorer-actions .option-select button,
+    .files-list .folder .explorer-actions .option-select button,
+    .files-list .folder .explorer-actions .option-select form,
+    .files-list .file .explorer-actions .option-select form {
+        width: 100%;
+        border-radius: 0;
+        background-color: var(--background);
+    }
+
+    .files-list .file .explorer-actions .option-select button:hover,
+    .files-list .folder .explorer-actions .option-select button:hover,
+    .files-list .folder .explorer-actions .option-select form:hover,
+    .files-list .file .explorer-actions .option-select form:hover {
+        background-color: var(--grey);
+    }
+    
+}
+
+@media (max-width: 500px) {
+    nav .header {
+        font-size: 1.3rem;
+    }
+
+    nav .website-logo {
+        display: none;
+    }
+}
+
+@media (max-width: 1000px) {
+    .upload .actions button {
+        padding: 8px;
+        font-size: 0.9rem;
+    }
+
+    .upload .actions .plus-icon {
+        font-size: 1.2rem;
+    }
+
+    .back > .current-folder {
+        font-size: 1.2rem;
+    }
+
+    .back > .back-icon {
+        font-size: 1.5rem;
+    }
 }
