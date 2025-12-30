@@ -456,7 +456,6 @@ viewRouter.get("/files/share/:shareId/:folder", asyncHandler(async (req, res) =>
         where: {
             AND: {
                 parentId: folderInfo.id,
-                userId: req.user.id,
             }
         },
         select: {
@@ -466,14 +465,9 @@ viewRouter.get("/files/share/:shareId/:folder", asyncHandler(async (req, res) =>
 
     const files = await prisma.File.findMany({
         where: {
-            AND: {
-                folderId: {
-                    equals: folderInfo.id,
-                },
-                userId: {
-                    equals: req.user.id,
-                }
-            }
+            folderId: {
+                equals: folderInfo.id,
+            },
         }
     });
 
@@ -497,20 +491,14 @@ viewRouter.get("/files/share/:shareId", asyncHandler(async (req, res) => {
         where: {
             AND: {
                 parentId: share.folderId,
-                userId: req.user.id,
             }
         },
     });
 
     const files = await prisma.File.findMany({
         where: {
-            AND: {
-                folderId: {
-                    equals: share.folderId,
-                },
-                userId: {
-                    equals: req.user.id,
-                }
+            folderId: {
+                equals: share.folderId,
             }
         }
     });
