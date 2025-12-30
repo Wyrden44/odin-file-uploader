@@ -245,6 +245,8 @@ nav .links .login-link {
     align-items: center;
     justify-content: center;
     gap: 20px;
+
+    min-width: 150px;
 }
 
 .popup form {
@@ -263,6 +265,7 @@ nav .links .login-link {
     font-size: 1rem;
     border: 1px solid var(--primary);
     border-radius: 5px;
+    min-width: 100px;
 }
 
 .popup form input:hover {
