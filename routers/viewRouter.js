@@ -117,7 +117,7 @@ viewRouter.get("/files", ensureAuth, asyncHandler(async (req, res) => {
         }
     });
 
-    res.render("index", {subpage: "files", title: "Files", user: req.user, subargs: {currentFolder: null, folders, files}});
+    res.render("index", {subpage: "files", title: "Files", user: req.user, subargs: {currentFolder: null, parentOfParentFolder: null, folders, files}});
 }));
 
 // subdirectories
@@ -135,11 +135,26 @@ viewRouter.get("/files/:folder", ensureAuth, asyncHandler(async (req, res) => {
         },
         select: {
             id: true,
+            parentId: true,
         }
     });
 
     if (!parentFolder) {
         throw new CustomError("Folder not Found", 404);
+    }
+
+    let parentOfParentFolder;
+
+    if (!parentFolder.parentId) {
+        parentOfParentFolder = null;
+    }
+    else {
+        const parentOfParentFolderInfo = await prisma.Folder.findUnique({
+            where: {
+                id: parentFolder.parentId,
+            }
+        });
+        parentOfParentFolder = parentOfParentFolderInfo.name;
     }
 
     const folders = await prisma.Folder.findMany({
@@ -158,7 +173,7 @@ viewRouter.get("/files/:folder", ensureAuth, asyncHandler(async (req, res) => {
         }
     });
 
-    res.render("index", {subpage: "files", title: "Files", user: req.user, subargs: {currentFolder: folder, folders, files}});
+    res.render("index", {subpage: "files", title: "Files", user: req.user, subargs: {currentFolder: folder, parentOfParentFolder, folders, files}});
 }));
 
 // upload file

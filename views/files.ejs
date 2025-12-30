@@ -1,16 +1,21 @@
 <section class="files">
     <div class="upload">
-        <% if (currentFolder !== null) { %>
-        <button class="share-folder">
-            <span class="plus-icon">&UpArrow;</span> Share
-        </button>
-        <% } %>
-        <button class="new-folder">
-            <span class="plus-icon">&plus;</span> New
-        </button>
-        <button class="new-file">
-            <span class="plus-icon">&plus;</span> Upload File
-        </button>
+        <a href="/files/<%= parentOfParentFolder %>" class="back">
+            <span class="back-icon">&lt;</span> <span class="current-folder"><%= (currentFolder != null) ? currentFolder : "root" %></span>
+        </a>
+        <div class="actions">
+            <% if (currentFolder !== null) { %>
+            <button class="share-folder">
+                <span class="plus-icon">&UpArrow;</span> Share
+            </button>
+            <% } %>
+            <button class="new-folder">
+                <span class="plus-icon">&plus;</span> New
+            </button>
+            <button class="new-file">
+                <span class="plus-icon">&plus;</span> Upload File
+            </button>
+        </div>
     </div>
 
     <div class="popup-backdrop" id="newFolderModal">
