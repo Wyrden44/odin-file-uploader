@@ -5,6 +5,7 @@ const {validationResult} = require("express-validator");
 const { PrismaClient } = require('@prisma/client');
 const { PrismaPg } = require("@prisma/adapter-pg");
 const CustomError = require("../errors/customError");
+const NotFoundError = require("../errors/notFoundError");
 const validator = require("../controllers/formValidator");
 
 const viewRouter = Router();
@@ -63,6 +64,20 @@ async function deleteRecursively(folderInfo) {
             name: folderInfo.name,
         }
     });
+}
+
+async function checkFolderParent(folderInfo, parentId) {
+    if (folderInfo.id === parentId || folderInfo.parentId === parentId) return true;
+
+    if (folderInfo.parentId == null) return false;
+
+    const parent = await prisma.Folder.findUnique({
+        where: {
+            id: folderInfo.parentId,
+        }
+    });
+
+    if (checkFolderParent(parent, parentId)) return true;
 }
 
 const asyncHandler = (fn) => (req, res, next) => {
@@ -383,7 +398,7 @@ viewRouter.post("/files/download/:file", ensureAuth, asyncHandler(async (req, re
         }
     });
 
-    if (!fileData || fileInfo.userId != req.user.id) {
+    if (!fileData || fileData.userId != req.user.id) {
         throw new CustomError("File not Found", 404);
     }
 
@@ -413,6 +428,130 @@ viewRouter.get("/files/details/file/:file", asyncHandler(async (req, res) => {
             dateStyle: "medium",
             timeStyle: "short"
     })});
+}));
+
+// sharing
+viewRouter.get("/files/share/:shareId/:folder", asyncHandler(async (req, res) => {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+
+    const {shareId, folder} = req.params;
+
+    const share = await prisma.Share.findUnique({
+        where: {
+            id: shareId,
+        }
+    });
+
+    if (!share) throw NotFoundError();
+
+    const folderInfo = await prisma.Folder.findUnique({
+        where: {
+            name: folder,
+        }
+    });
+
+    if (!folderInfo || !checkFolderParent(folderInfo, share.id)) throw new NotFoundError("Folder not Found");
+
+    const folders = await prisma.Folder.findMany({
+        where: {
+            AND: {
+                parentId: folderInfo.id,
+                userId: req.user.id,
+            }
+        },
+        select: {
+            name: true,
+        }
+    });
+
+    const files = await prisma.File.findMany({
+        where: {
+            AND: {
+                folderId: {
+                    equals: folderInfo.id,
+                },
+                userId: {
+                    equals: req.user.id,
+                }
+            }
+        }
+    });
+
+    res.render("index", {subpage: "sharedFiles", title: "Shared folder", user: req.user, subargs: {sharingLink: shareId, folders, files}});
+}));
+
+viewRouter.get("/files/share/:shareId", asyncHandler(async (req, res) => {
+    const {shareId} = req.params;
+
+    const share = await prisma.Share.findUnique({
+        where: {
+            id: shareId,
+        }
+    });
+
+    if (!share) throw NotFoundError();
+
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+
+    const folders = await prisma.Folder.findMany({
+        where: {
+            AND: {
+                parentId: share.folderId,
+                userId: req.user.id,
+            }
+        },
+    });
+
+    const files = await prisma.File.findMany({
+        where: {
+            AND: {
+                folderId: {
+                    equals: share.folderId,
+                },
+                userId: {
+                    equals: req.user.id,
+                }
+            }
+        }
+    });
+
+    res.render("index", {subpage: "sharedFiles", title: "Shared folder", user: req.user, subargs: {sharingLink: shareId, folders, files}});
+}));
+
+viewRouter.post("/files/share/:folder", ensureAuth, asyncHandler(async (req, res) => {
+    const {folder} = req.params;
+    // TODO add validation
+    const duration = Number(req.body.duration);
+
+    const now = new Date();
+
+    const expiresAt = new Date(now);
+    expiresAt.setDate(expiresAt.getDate() + duration);
+
+    const folderInfo = await prisma.Folder.findFirst({
+        where: {
+            AND: {
+                name: folder,
+                userId: req.user.id
+            }
+        }
+    });
+
+    if (!folderInfo) {
+        throw CustomError("Folder not Found", 404);
+    }
+
+    // generate link
+    const share = await prisma.Share.create({
+        data: {
+            folderId: folderInfo.id,
+            expiresAt: expiresAt,
+        }
+    });
+
+    if (!share) throw new CustomError("An unexpected error occurred when creating the share link");
+
+    res.redirect("/files/share/" + share.id);
 }));
 
 module.exports = {viewRouter};

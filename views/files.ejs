@@ -1,5 +1,10 @@
 <section class="files">
     <div class="upload">
+        <% if (currentFolder !== null) { %>
+        <button class="share-folder">
+            <span class="plus-icon">&UpArrow;</span> Share
+        </button>
+        <% } %>
         <button class="new-folder">
             <span class="plus-icon">&plus;</span> New
         </button>
@@ -48,6 +53,20 @@
         </div>
     </div>
 
+    <div class="popup-backdrop" id="shareFolderModal">
+        <div class="popup">
+            <button class="close" id="closeShareFolder" aria-label="Close">&times;</button>
+
+            <h3>Share Folder</h3>
+
+            <form action="/files/share/<%= (currentFolder != null) ? currentFolder + '/' : '' %>" method="post">
+                <label for="duration">Duration (days):</label>
+                <input type="number" name="duration" id="duration" min="1" max="365" required>
+                <button type="submit">Generate link</button>
+            </form>
+        </div>
+    </div>
+
     <div class="files-list">
         <% for (const folder of folders) { %>
             <%- include("folder", { name: folder.name }) %>
@@ -60,9 +79,12 @@
     <script>
         const openBtn = document.querySelector(".new-folder");
         const fileOpenBtn = document.querySelector(".new-file");
+        const shareOpenBtn = document.querySelector(".share-folder");
         const modalBackdrop = document.getElementById("newFolderModal");
         const fileModalBackdrop = document.getElementById("uploadFileModal");
+        const shareModalBackdrop = document.getElementById("shareFolderModal");
         const closeBtn = modalBackdrop.querySelector(".close");
+        const shareCloseBtn = shareModalBackdrop.querySelector("#closeShareFolder");
         const fileCloseBtn = fileModalBackdrop.querySelector("#closeFile");
         const modalInput = modalBackdrop.querySelector("#name");
         const uploadFileModalBackdrop = document.getElementById("fileDetailsModal");
@@ -70,17 +92,21 @@
 
         addModalOpenEvents(openBtn, modalBackdrop);
         addModalOpenEvents(fileOpenBtn, fileModalBackdrop);
+        addModalOpenEvents(shareOpenBtn, shareModalBackdrop);
 
         addModalCloseEvents(modalBackdrop);
         addModalCloseEvents(fileModalBackdrop);
+        addModalCloseEvents(shareModalBackdrop);
         
         closeBtn.addEventListener("click", (e) => closeModal(modalBackdrop));
         fileCloseBtn.addEventListener("click", (e) => closeModal(fileModalBackdrop));
+        shareCloseBtn.addEventListener("click", (e) => closeModal(shareModalBackdrop));
 
         document.addEventListener("keydown", (e) => {
             if (e.key === "Escape") {
                 closeModal(fileModalBackdrop);
                 closeModal(modalBackdrop);
+                closeModal(shareModalBackdrop);
             }
         });
 

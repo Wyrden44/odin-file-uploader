@@ -1,0 +1,10 @@
+<section class="files">
+    <div class="files-list">
+        <% for (const folder of folders) { %>
+            <%- include("sharedFolder", { name: folder.name, sharingLink }) %>
+        <% } %>
+        <% for (const file of files) { %>
+            <%- include("sharedFile", { name: file.name, size: file.size, path: file.path, storageKey: file.storageKey, sharingLink }) %>
+        <% } %>
+    </div>
+</section>

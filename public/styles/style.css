@@ -194,24 +194,7 @@ nav .links .login-link {
     gap: 10px;
 }
 
-.new-folder {
-    padding: 8px;
-    padding-right: 12px;
-    border: none;
-    border-radius: 10px;
-
-    display: flex;
-    align-items: center;
-    gap: 5px;
-
-    font-size: 1rem;
-    color: var(--background);
-    font-weight: 600;
-
-    background-color: var(--secondary);
-}
-
-.new-file {
+.upload > button {
     padding: 8px;
     padding-right: 12px;
     border: none;
