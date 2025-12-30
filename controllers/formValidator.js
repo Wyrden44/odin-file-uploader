@@ -53,3 +53,8 @@ exports.folderValidator = [
         .isLength({max: 255}).withMessage("The maximum length for the folder name is 255 chars")
         .matches(/^[0-9a-zA-Z_\-]+$/).withMessage("Name contains invalid characters")
 ];
+
+exports.durationValidator = [
+    body("duration").trim()
+        .isInt({ min: 1, max: 365 }).withMessage("Invalid duration")
+]

@@ -92,21 +92,25 @@
 
         addModalOpenEvents(openBtn, modalBackdrop);
         addModalOpenEvents(fileOpenBtn, fileModalBackdrop);
-        addModalOpenEvents(shareOpenBtn, shareModalBackdrop);
+        if (shareOpenBtn)
+            addModalOpenEvents(shareOpenBtn, shareModalBackdrop);
 
         addModalCloseEvents(modalBackdrop);
         addModalCloseEvents(fileModalBackdrop);
-        addModalCloseEvents(shareModalBackdrop);
+        if (shareOpenBtn)
+            addModalCloseEvents(shareModalBackdrop);
         
         closeBtn.addEventListener("click", (e) => closeModal(modalBackdrop));
         fileCloseBtn.addEventListener("click", (e) => closeModal(fileModalBackdrop));
-        shareCloseBtn.addEventListener("click", (e) => closeModal(shareModalBackdrop));
+        if (shareOpenBtn)
+            shareCloseBtn.addEventListener("click", (e) => closeModal(shareModalBackdrop));
 
         document.addEventListener("keydown", (e) => {
             if (e.key === "Escape") {
                 closeModal(fileModalBackdrop);
                 closeModal(modalBackdrop);
-                closeModal(shareModalBackdrop);
+                if (shareOpenBtn)
+                    closeModal(shareModalBackdrop);
             }
         });
 

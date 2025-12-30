@@ -506,9 +506,16 @@ viewRouter.get("/files/share/:shareId", asyncHandler(async (req, res) => {
     res.render("index", {subpage: "sharedFiles", title: "Shared folder", user: req.user, subargs: {sharingLink: shareId, folders, files}});
 }));
 
-viewRouter.post("/files/share/:folder", ensureAuth, asyncHandler(async (req, res) => {
+viewRouter.post("/files/share/:folder", ensureAuth, validator.durationValidator, asyncHandler(async (req, res) => {
     const {folder} = req.params;
-    // TODO add validation
+
+    const errors = validationResult(req).array();
+
+    if (errors.length !== 0) {
+        console.log(errors);
+        return res.redirect("/files" + folder);
+    }
+
     const duration = Number(req.body.duration);
 
     const now = new Date();
