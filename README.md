@@ -3,9 +3,9 @@
 
 This is an online file hosting service project. You can CRUD files and folders and share folders with other people.
 
-[Showcase Picture](./public/showcase/showcase1.png)
+![Showcase Picture](./public/showcase/showcase1.png)
 
-[Showcase Picture](./public/showcase/showcase2.png)
+![Showcase Picture](./public/showcase/showcase2.png)
 
 ## General Info
 Date: 1.12.2025
