@@ -457,6 +457,13 @@ viewRouter.get("/files/share/:shareId/:folder", asyncHandler(async (req, res) =>
         }
     });
 
+    const expiration = new Date(share.expiresAt);
+    const now = new Date();
+
+    if (now > expiration) {
+        throw new CustomError("The link has expired");
+    }
+
     if (!share) throw NotFoundError();
 
     const folderInfo = await prisma.Folder.findUnique({
@@ -499,6 +506,13 @@ viewRouter.get("/files/share/:shareId", asyncHandler(async (req, res) => {
     });
 
     if (!share) throw NotFoundError();
+
+    const expiration = new Date(share.expiresAt);
+    const now = new Date();
+
+    if (now > expiration) {
+        throw new CustomError("The link has expired", 404);
+    }
 
     res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
 
